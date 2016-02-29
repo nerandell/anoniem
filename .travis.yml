@@ -1,0 +1,14 @@
+language : python
+sudo: false
+python:
+    - "3.3"
+    - "3.4"
+    - "3.5"
+
+before_install:
+    - pip install pytest
+    - pip install click
+    - pip install fake-factory
+
+script:
+    - python3 -m pytest

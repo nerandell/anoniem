@@ -10,6 +10,3 @@ class Producer:
         for row in cursor:
             self._queue.put((table, column, primary_key, random_data(), row[0]))
         cursor.close()
-
-
-
