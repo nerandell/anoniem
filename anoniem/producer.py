@@ -7,6 +7,6 @@ class Producer:
     def create_job(self, table, primary_key, column, action):
         cursor = self._db.execute_query('SELECT {} from {}'.format(primary_key, table), ())
         random_data = getattr(self._provider, action)
-        for row in cursor:
-            self._queue.put((table, column, primary_key, random_data(), row[0]))
+        job = [(table, column, primary_key, random_data(), row[0]) for row in cursor]
+        self._queue.put(job)
         cursor.close()

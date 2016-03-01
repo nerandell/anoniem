@@ -1,4 +1,6 @@
 class Consumer:
+    batch_query = 'update {} set {} = case {} end where {} in %s'
+
     def __init__(self, queue, db):
         self._queue = queue
         self._db = db
@@ -10,7 +12,23 @@ class Consumer:
             self._queue.task_done()
 
     def _run(self, job):
-        table, column, primary_key, random_value, primary_key_id = job
-        cursor = self._db.execute_query('UPDATE {} SET {} = %s WHERE {} = %s'.format(table, column, primary_key),
-                                        (random_value, primary_key_id))
-        cursor.close()
+        print("Here")
+        when_query = ''
+        values = ()
+        p_keys = []
+        mtable = None
+        mcolumn = None
+        mprimary = None
+        if len(job):
+            for ele in job:
+                table, column, primary_key, random_value, primary_key_id = ele
+                p_keys.append(primary_key_id)
+                mtable = table
+                mcolumn = column
+                mprimary = primary_key
+                when_query += ' when {} = %s then %s'.format(primary_key)
+                values = values + (primary_key_id, random_value)
+            values = values + (p_keys,)
+            print('On Job', mtable, mcolumn)
+            cursor = self._db.execute_query(self.batch_query.format(mtable, mcolumn, when_query, mprimary), values)
+            cursor.close()
