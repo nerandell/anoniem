@@ -1,5 +1,5 @@
 class Consumer:
-    bulk_update_query = 'update {} set {} = case {} end where {} in %s'
+    bulk_update_query = 'update {0} set {1} = case {2} end where {3} in %s'
 
     def __init__(self, queue, db):
         self._queue = queue

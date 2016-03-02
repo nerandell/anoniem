@@ -6,7 +6,7 @@ class Producer:
         self._db = db
 
     def build_cache(self, table, primary_key):
-        cursor = self._db.execute_query('SELECT {} from {}'.format(primary_key, table), ())
+        cursor = self._db.execute_query('SELECT {0} from {1}'.format(primary_key, table), ())
         primary_keys = [row[0] for row in cursor]
         self._cache[table] = primary_keys
         cursor.close()
