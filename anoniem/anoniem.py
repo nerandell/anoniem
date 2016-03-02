@@ -21,6 +21,7 @@ class Anoniem:
         self._queue = Queue()
         self._num_of_workers = num_of_workers
         self._producer = Producer(self._queue, self._get_db_client(), Faker())
+        self._consumer = Consumer(None, None, './tests/query.sql')
 
     def _create_workers(self):
         for i in range(self._num_of_workers):
@@ -45,14 +46,14 @@ class Anoniem:
         queues = []
         threads = []
         for table, actions in tables.items():
-            queue = Queue()
-            queues.append(queue)
-            t = self._worker(table, queue)
-            threads.append(t)
+            # queue = Queue()
+            # queues.append(queue)
+            # t = self._worker(table, queue)
+            # threads.append(t)
             # print('On Table', table, ':')
             primary_key = actions.pop('primary_key')
             for action, columns in actions.items():
-                self._randomize(table, columns, primary_key, action, queue)
+                self._randomize(table, columns, primary_key, action, None)
 
         for queue in queues:
             queue.join()
@@ -61,10 +62,11 @@ class Anoniem:
         for column in columns:
             # print('\tAction {} on Column {}'.format(action, column))
             job = self._producer.create_job(table, primary_key, column, action[10:])
-            queue.put(job)
+            self._consumer._run(job)
+            # queue.put(job)
 
     def _consume(self, queue):
-        consumer = Consumer(queue, self._get_db_client())
+        consumer = Consumer(queue, self._get_db_client(), './tests/query.sql')
         consumer.consume()
 
     def _worker(self, table, queue):
