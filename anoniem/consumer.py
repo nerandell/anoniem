@@ -12,8 +12,8 @@ class Consumer:
             self._queue.task_done()
 
     def _run(self, job):
-        when_query = ''
-        values = ()
+        when_query = []
+        values = []
         p_keys = []
         mtable = None
         mcolumn = None
@@ -25,13 +25,15 @@ class Consumer:
                 mtable = table
                 mcolumn = column
                 mprimary = primary_key
-                when_query += ' when {0} = %s then %s'.format(primary_key)
-                values = values + (primary_key_id, random_value)
-            values = values + (p_keys,)
+                when_query.append('when {0} = %s then %s'.format(primary_key))
+                values.append(primary_key_id)
+                values.append(random_value)
+            values.append(p_keys)
             print 'On Job ' + mtable + ' ' + mcolumn
             try:
-                cursor = self._db.execute_query(self.bulk_update_query.format(mtable, mcolumn, when_query, mprimary),
-                                                values)
+                cursor = self._db.execute_query(
+                    self.bulk_update_query.format(mtable, mcolumn, ' '.join(when_query), mprimary),
+                    values)
                 cursor.close()
                 print 'Finished Job ' + mtable + ' ' + mcolumn
             except Exception as e:
