@@ -1,5 +1,5 @@
 class Consumer:
-    batch_query = 'update {} set {} = case {} end where {} in %s'
+    bulk_update_query = 'update {} set {} = case {} end where {} in %s'
 
     def __init__(self, queue, db):
         self._queue = queue
@@ -30,7 +30,7 @@ class Consumer:
             values = values + (p_keys,)
             print('On Job', mtable, mcolumn)
             try:
-                cursor = self._db.execute_query(self.batch_query.format(mtable, mcolumn, when_query, mprimary), values)
+                cursor = self._db.execute_query(self.bulk_update_query.format(mtable, mcolumn, when_query, mprimary), values)
                 cursor.close()
                 print('Finished Job', mtable, mcolumn)
             except Exception as e:
