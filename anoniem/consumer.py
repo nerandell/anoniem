@@ -25,7 +25,7 @@ class Consumer:
                 mtable = table
                 mcolumn = column
                 mprimary = primary_key
-                when_query += ' when {} = %s then %s'.format(primary_key)
+                when_query += ' when {0} = %s then %s'.format(primary_key)
                 values = values + (primary_key_id, random_value)
             values = values + (p_keys,)
             print 'On Job ' + mtable + ' ' + mcolumn
