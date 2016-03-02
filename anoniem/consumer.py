@@ -24,7 +24,7 @@ class Consumer:
                 table, column, primary_key, random_value, action, primary_key_id = ele
                 if action != 'random_int':
                     random_value = str(random_value)
-                if isinstance(random_value, str):
+                if isinstance(random_value, str) and (action == 'email' or column == 'screenname'):
                     random_value = str(self._counter) + random_value
                 self._counter += 1
                 p_keys.append(primary_key_id)
