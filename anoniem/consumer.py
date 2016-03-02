@@ -12,7 +12,6 @@ class Consumer:
             self._queue.task_done()
 
     def _run(self, job):
-        print("Here")
         when_query = ''
         values = ()
         p_keys = []
@@ -30,5 +29,9 @@ class Consumer:
                 values = values + (primary_key_id, random_value)
             values = values + (p_keys,)
             print('On Job', mtable, mcolumn)
-            cursor = self._db.execute_query(self.batch_query.format(mtable, mcolumn, when_query, mprimary), values)
-            cursor.close()
+            try:
+                cursor = self._db.execute_query(self.batch_query.format(mtable, mcolumn, when_query, mprimary), values)
+                cursor.close()
+                print('Finished Job', mtable, mcolumn)
+            except Exception as e:
+                print(e, mtable, mcolumn)
