@@ -40,4 +40,4 @@ class Consumer:
                     target.write(mtable + ':' + mcolumn + '\n')
 
             except Exception as e:
-                print e
+                print "Exception {0} for table {1} and column {2}".format(e, table, column)
