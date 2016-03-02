@@ -1,5 +1,5 @@
 from threading import Thread
-from queue import Queue
+from Queue import Queue
 
 import yaml
 import click
@@ -40,7 +40,7 @@ class Anoniem:
         for table, actions in tables.items():
             self._producer.build_cache(table, actions['primary_key'])
 
-        print('Cache built')
+        print 'Cache built'
 
         queues = []
         threads = []
@@ -68,7 +68,7 @@ class Anoniem:
         consumer.consume()
 
     def _worker(self, table, queue):
-        print('Creating thread for table', table)
+        print 'Creating thread for table', table
         t = Thread(target=self._consume, name=table, args=(queue, ))
         t.daemon = True
         t.start()

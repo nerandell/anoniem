@@ -28,10 +28,11 @@ class Consumer:
                 when_query += ' when {} = %s then %s'.format(primary_key)
                 values = values + (primary_key_id, random_value)
             values = values + (p_keys,)
-            print('On Job', mtable, mcolumn)
+            print 'On Job ' + mtable + ' ' + mcolumn
             try:
-                cursor = self._db.execute_query(self.bulk_update_query.format(mtable, mcolumn, when_query, mprimary), values)
+                cursor = self._db.execute_query(self.bulk_update_query.format(mtable, mcolumn, when_query, mprimary),
+                                                values)
                 cursor.close()
-                print('Finished Job', mtable, mcolumn)
+                print 'Finished Job ' + mtable + ' ' + mcolumn
             except Exception as e:
-                print(e, mtable, mcolumn)
+                print e + ' ' + mtable + ' ' + mcolumn
