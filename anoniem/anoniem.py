@@ -48,6 +48,7 @@ class Anoniem:
             for line in target:
                 table, column = line.split(':')
                 self._done[table].append(column)
+        print self._done
 
         queues = []
         threads = []

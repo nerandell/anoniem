@@ -2,6 +2,7 @@ class Consumer:
     bulk_update_query = 'update {0} set {1} = case {2} end where {3} in %s'
 
     def __init__(self, queue, db):
+        self._counter = 0
         self._queue = queue
         self._db = db
 
@@ -21,6 +22,9 @@ class Consumer:
         if len(job):
             for ele in job:
                 table, column, primary_key, random_value, primary_key_id = ele
+                if isinstance(random_value, str):
+                    random_value = str(self._counter) + random_value
+                self._counter += 1
                 p_keys.append(primary_key_id)
                 mtable = table
                 mcolumn = column
