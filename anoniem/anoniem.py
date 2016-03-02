@@ -5,9 +5,9 @@ import yaml
 import click
 from faker import Faker
 
-from anoniem.consumer import Consumer
-from anoniem.producer import Producer
-from anoniem.db_client import DbClient
+from .consumer import Consumer
+from .producer import Producer
+from .db_client import DbClient
 
 
 class Anoniem:
