@@ -14,8 +14,5 @@ class Producer:
     def create_job(self, table, primary_key, column, action):
         primary_keys = self._cache[table]
         random_data = getattr(self._provider, action)
-        if action != 'random_int':
-            random_data = str(random_data)
-        print random_data().__class__.__name__
-        job = [(table, column, primary_key, random_data(), row) for row in primary_keys]
+        job = [(table, column, primary_key, random_data(), action, row) for row in primary_keys]
         return job
