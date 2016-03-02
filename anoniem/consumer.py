@@ -37,4 +37,4 @@ class Consumer:
                 cursor.close()
                 print 'Finished Job ' + mtable + ' ' + mcolumn
             except Exception as e:
-                print e + ' ' + mtable + ' ' + mcolumn
+                print e
