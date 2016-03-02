@@ -47,7 +47,7 @@ class Anoniem:
         with open('./output.txt') as target:
             for line in target:
                 table, column = line.split(':')
-                self._done[table].append(column)
+                self._done[table].append(column[:-1])
         print self._done
 
         queues = []
