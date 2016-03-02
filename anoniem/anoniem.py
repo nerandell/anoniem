@@ -44,7 +44,7 @@ class Anoniem:
 
         print 'Cache built'
 
-        with open('./output.txt', 'w+') as target:
+        with open('./output.txt', 'a') as target:
             for line in target:
                 table, column = line.split(':')
                 self._done[table].append(column)

@@ -36,7 +36,7 @@ class Consumer:
                     values)
                 cursor.close()
                 print 'Finished Job ' + mtable + ' ' + mcolumn
-                with open('./output.txt', 'w') as target:
+                with open('./output.txt', 'a') as target:
                     target.write(mtable + ':' + mcolumn + '\n')
 
             except Exception as e:
