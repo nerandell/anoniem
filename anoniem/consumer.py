@@ -22,7 +22,7 @@ class Consumer:
         if len(job):
             for ele in job:
                 table, column, primary_key, random_value, primary_key_id = ele
-                print random_value.__class__.__name
+                print random_value.__class__.__name__
                 if isinstance(random_value, str):
                     print "Here"
                     random_value = str(self._counter) + random_value
