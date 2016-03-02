@@ -36,14 +36,14 @@ class Consumer:
                 values.append(random_value)
             values.append(p_keys)
             print 'On Job ' + mtable + ' ' + mcolumn
-            try:
-                cursor = self._db.execute_query(
-                    self.bulk_update_query.format(mtable, mcolumn, ' '.join(when_query), mprimary),
-                    values)
-                cursor.close()
-                print 'Finished Job ' + mtable + ' ' + mcolumn
-                with open('./output.txt', 'a') as target:
-                    target.write(mtable + ':' + mcolumn + '\n')
-
-            except Exception as e:
-                print "Exception {0} for table {1} and column {2}".format(e, table, column)
+            # try:
+            #     cursor = self._db.execute_query(
+            #         self.bulk_update_query.format(mtable, mcolumn, ' '.join(when_query), mprimary),
+            #         values)
+            #     cursor.close()
+            #     print 'Finished Job ' + mtable + ' ' + mcolumn
+            #     with open('./output.txt', 'a') as target:
+            #         target.write(mtable + ':' + mcolumn + '\n')
+            #
+            # except Exception as e:
+            #     print "Exception {0} for table {1} and column {2}".format(e, table, column)
