@@ -1,5 +1,6 @@
 from threading import Thread
 from Queue import Queue
+from collections import defaultdict
 
 import yaml
 import click
@@ -21,6 +22,7 @@ class Anoniem:
         self._queue = Queue()
         self._num_of_workers = num_of_workers
         self._producer = Producer(self._queue, self._get_db_client(), Faker())
+        self._done = defaultdict(list)
 
     def _create_workers(self):
         for i in range(self._num_of_workers):
@@ -42,6 +44,11 @@ class Anoniem:
 
         print 'Cache built'
 
+        with open('./output.txt', 'w+') as target:
+            for line in target:
+                table, column = line.split(':')
+                self._done[table].append(column)
+
         queues = []
         threads = []
         for table, actions in tables.items():
@@ -59,9 +66,12 @@ class Anoniem:
 
     def _randomize(self, table, columns, primary_key, action, queue):
         for column in columns:
-            # print('\tAction {} on Column {}'.format(action, column))
-            job = self._producer.create_job(table, primary_key, column, action[10:])
-            queue.put(job)
+            if column in self._done[table]:
+                print 'Skipping column {0} for table {1}'.format(column, table)
+            else:
+                # print('\tAction {} on Column {}'.format(action, column))
+                job = self._producer.create_job(table, primary_key, column, action[10:])
+                queue.put(job)
 
     def _consume(self, queue):
         consumer = Consumer(queue, self._get_db_client())
