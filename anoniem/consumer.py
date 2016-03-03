@@ -1,10 +1,11 @@
 class Consumer:
     bulk_update_query = 'update {} set {} = case {} end where {} in %s'
 
-    def __init__(self, queue, db):
+    def __init__(self, queue, db, data_provider):
         self._counter = 0
         self._queue = queue
         self._db = db
+        self._provider = data_provider
 
     def consume(self):
         while True:
@@ -13,38 +14,31 @@ class Consumer:
             self._queue.task_done()
 
     def _run(self, job):
-        when_query = []
-        values = []
-        p_keys = []
-        mtable = None
-        mcolumn = None
-        mprimary = None
-        if len(job):
-            print ('Got job')
-            for ele in job:
-                table, column, primary_key, random_value, action, primary_key_id = ele
+        table, primary_key, ids, updates = job
+        update_values = []
+        factories = []
+        for action, column in updates:
+            factory = getattr(self._provider, action)
+            update_values.append('{0} = %s'.format(column))
+            append = (action == 'email' or column == 'screenname')
+            factories.append((factory, action, append))
+        for primary_key_id in ids:
+            values = []
+            for factory, action, append in factories:
+                random_value = factory()
                 if action != 'random_int':
                     random_value = str(random_value)
-                if isinstance(random_value, str) and (action == 'email' or column == 'screenname'):
+                if isinstance(random_value, str) and append:
                     random_value = str(self._counter) + random_value
                 self._counter += 1
-                p_keys.append(str(primary_key_id))
-                mtable = table
-                mcolumn = column
-                mprimary = primary_key
-                when_query.append('when {} = %s then %s'.format(primary_key))
-                values.append(primary_key_id)
                 values.append(random_value)
-            values.append(p_keys)
-            print('On Job ' + mtable + ' ' + mcolumn)
+            update_query = 'update {0} set {1} where {2} = %s'.format(table, ', '.join(update_values), primary_key)
             try:
-                cursor = self._db.execute_query(
-                    self.bulk_update_query.format(mtable, mcolumn, ' '.join(when_query), mprimary),
-                    values)
+                values.append(primary_key_id)
+                cursor = self._db.execute_query(update_query, values)
                 cursor.close()
-                print('Finished Job ' + mtable + ' ' + mcolumn)
-                with open('./output.txt', 'a') as target:
-                    target.write(mtable + ':' + mcolumn + '\n')
-
             except Exception as e:
-                print("Exception {} for table {} and column {}".format(e, mtable, mcolumn))
+                print "Exception {0} for table {1}".format(e, table)
+                break
+        else:
+            print 'Finished Job ' + table

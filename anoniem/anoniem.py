@@ -1,5 +1,5 @@
 from threading import Thread
-from queue import Queue
+from Queue import Queue
 from collections import defaultdict
 
 import yaml
@@ -42,42 +42,27 @@ class Anoniem:
         for table, actions in tables.items():
             self._producer.build_cache(table, actions['primary_key'])
 
-        print('Cache built')
-
-        with open('./output.txt') as target:
-            for line in target:
-                table, column = line.split(':')
-                self._done[table].append(column[:-1])
-        print(self._done)
+        print 'Cache built'
 
         queues = []
         for table, actions in tables.items():
             queue = Queue()
             queues.append(queue)
-            t = self._worker(table, queue)
-            print('On Table', table, ':')
+            self._worker(table, queue)
+            print 'On Table {0}'.format(table)
             primary_key = actions.pop('primary_key')
-            for action, columns in actions.items():
-                self._randomize(table, columns, primary_key, action, queue)
+            job = self._producer.create_row_job(table, primary_key, actions)
+            queue.put(job)
 
         for queue in queues:
             queue.join()
 
-    def _randomize(self, table, columns, primary_key, action, queue):
-        for column in columns:
-            if column in self._done[table]:
-                print('Skipping column {0} for table {1}'.format(column, table))
-            else:
-                # print('\tAction {} on Column {}'.format(action, column))
-                job = self._producer.create_job(table, primary_key, column, action[10:])
-                queue.put(job)
-
     def _consume(self, queue):
-        consumer = Consumer(queue, self._get_db_client())
+        consumer = Consumer(queue, self._get_db_client(), Faker())
         consumer.consume()
 
     def _worker(self, table, queue):
-        print('Creating thread for table', table)
+        print 'Creating thread for table', table
         t = Thread(target=self._consume, name=table, args=(queue, ))
         t.daemon = True
         t.start()

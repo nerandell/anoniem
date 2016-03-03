@@ -16,3 +16,11 @@ class Producer:
         random_data = getattr(self._provider, action)
         job = [(table, column, primary_key, random_data(), action, row) for row in primary_keys]
         return job
+
+    def create_row_job(self, table, primary_key, actions):
+        job = []
+        for action, columns in actions.items():
+            for column in columns:
+                job.append((action[10:], column))
+
+        return table, primary_key, self._cache[table], job
