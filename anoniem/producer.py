@@ -6,7 +6,7 @@ class Producer:
         self._db = db
 
     def build_cache(self, table, primary_key):
-        cursor = self._db.execute_query('SELECT {} from {}'.format(primary_key, table), ())
+        cursor = self._db.execute_query('SELECT {0} from {1}'.format(primary_key, table), ())
         primary_keys = [row[0] for row in cursor]
         self._cache[table] = primary_keys
         cursor.close()
@@ -14,5 +14,5 @@ class Producer:
     def create_job(self, table, primary_key, column, action):
         primary_keys = self._cache[table]
         random_data = getattr(self._provider, action)
-        job = [(table, column, primary_key, random_data(), row) for row in primary_keys]
+        job = [(table, column, primary_key, random_data(), action, row) for row in primary_keys]
         return job

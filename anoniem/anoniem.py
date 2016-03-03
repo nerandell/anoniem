@@ -1,13 +1,14 @@
 from threading import Thread
 from queue import Queue
+from collections import defaultdict
 
 import yaml
 import click
 from faker import Faker
 
-from anoniem.consumer import Consumer
-from anoniem.producer import Producer
-from anoniem.db_client import DbClient
+from .consumer import Consumer
+from .producer import Producer
+from .db_client import DbClient
 
 
 class Anoniem:
@@ -21,7 +22,7 @@ class Anoniem:
         self._queue = Queue()
         self._num_of_workers = num_of_workers
         self._producer = Producer(self._queue, self._get_db_client(), Faker())
-        self._consumer = Consumer(None, None, './tests/query.sql')
+        self._done = defaultdict(list)
 
     def _create_workers(self):
         for i in range(self._num_of_workers):
@@ -43,30 +44,36 @@ class Anoniem:
 
         print('Cache built')
 
+        with open('./output.txt') as target:
+            for line in target:
+                table, column = line.split(':')
+                self._done[table].append(column[:-1])
+        print(self._done)
+
         queues = []
-        threads = []
         for table, actions in tables.items():
-            # queue = Queue()
-            # queues.append(queue)
-            # t = self._worker(table, queue)
-            # threads.append(t)
-            # print('On Table', table, ':')
+            queue = Queue()
+            queues.append(queue)
+            t = self._worker(table, queue)
+            print('On Table', table, ':')
             primary_key = actions.pop('primary_key')
             for action, columns in actions.items():
-                self._randomize(table, columns, primary_key, action, None)
+                self._randomize(table, columns, primary_key, action, queue)
 
         for queue in queues:
             queue.join()
 
     def _randomize(self, table, columns, primary_key, action, queue):
         for column in columns:
-            # print('\tAction {} on Column {}'.format(action, column))
-            job = self._producer.create_job(table, primary_key, column, action[10:])
-            self._consumer._run(job)
-            # queue.put(job)
+            if column in self._done[table]:
+                print('Skipping column {0} for table {1}'.format(column, table))
+            else:
+                # print('\tAction {} on Column {}'.format(action, column))
+                job = self._producer.create_job(table, primary_key, column, action[10:])
+                queue.put(job)
 
     def _consume(self, queue):
-        consumer = Consumer(queue, self._get_db_client(), './tests/query.sql')
+        consumer = Consumer(queue, self._get_db_client())
         consumer.consume()
 
     def _worker(self, table, queue):
